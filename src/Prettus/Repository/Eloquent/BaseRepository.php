@@ -445,6 +445,28 @@ abstract class BaseRepository implements RepositoryInterface, RepositoryCriteria
         return $this->paginate($limit, $columns, "simplePaginate");
     }
 
+     /**
+     * Chunk the results of the repository.
+     *
+     * @param null   $limit
+     * @param array  $columns
+     * @param string $method
+     *
+     * @return mixed
+     */
+    public function chunk($count, callable $callback)
+    {
+        $this->applyCriteria();
+        $this->applyScope();
+
+        $this->model->chunk($count, function ($results) use ($callback) {
+            call_user_func($callback, $this->parserResult($results));
+        });
+
+        $this->resetModel();
+        $this->resetScope();
+    }
+
     /**
      * Find data by id
      *
